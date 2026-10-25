@@ -1,0 +1,38 @@
+# Local production-like stack: app + Postgres. Dev defaults only; change them for anything real.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: saas
+      POSTGRES_USER: saas
+      POSTGRES_PASSWORD: saas
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saas -d saas"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DEBUG: "false"
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in your shell or a compose .env file}
+      DATABASE_URL: postgres://saas:saas@db:5432/saas
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000
+      # Plain HTTP on localhost: turn the HTTPS-only protections off for this local stack.
+      SECURE_SSL_REDIRECT: "false"
+      SECURE_HSTS_SECONDS: "0"
+      SESSION_COOKIE_SECURE: "false"
+      CSRF_COOKIE_SECURE: "false"
+    ports:
+      - "8000:8000"
+    command: sh -c "python manage.py migrate --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
+
+volumes:
+  pgdata:

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block head_title %}Delete account &middot; {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Delete your account</h1>
+  <p>This permanently deletes your account and all of your data. It cannot be undone.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form.html" %}
+    <button type="submit" class="button danger">Permanently delete</button>
+    <a class="button secondary" href="{% url 'account-settings' %}">Cancel</a>
+  </form>
+</section>
+{% endblock %}

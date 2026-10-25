@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>{{ SITE_NAME }}</h1>
+  <p>A production-minded Django SaaS starter: accounts, plans, optional Stripe billing and an owner-scoped API example.</p>
+  <p>
+    {% if user.is_authenticated %}
+      <a class="button" href="{% url 'account-settings' %}">Go to your account</a>
+    {% else %}
+      <a class="button" href="{% url 'signup' %}">Create an account</a>
+      <a class="button secondary" href="{% url 'login' %}">Sign in</a>
+    {% endif %}
+    <a class="button secondary" href="{% url 'docs' %}">Explore the API</a>
+  </p>
+</section>
+{% endblock %}

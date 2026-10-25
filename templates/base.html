@@ -1,0 +1,45 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block head_title %}{{ SITE_NAME }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="container nav" aria-label="Main">
+      <a class="brand" href="{% url 'home' %}">{{ SITE_NAME }}</a>
+      <ul>
+        <li><a href="{% url 'docs' %}">API docs</a></li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'account-settings' %}">Account</a></li>
+          <li>
+            <form method="post" action="{% url 'logout' %}" class="inline">
+              {% csrf_token %}<button type="submit" class="link">Sign out</button>
+            </form>
+          </li>
+        {% else %}
+          <li><a href="{% url 'login' %}">Sign in</a></li>
+          <li><a class="button small" href="{% url 'signup' %}">Sign up</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+  <main id="main" class="container">
+    {% if messages %}
+      <ul class="messages" role="status">
+        {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="container footer">
+    <small>{{ SITE_NAME }} &middot; built with the Django SaaS Starter</small>
+  </footer>
+  {% block extra_body %}{% endblock %}
+</body>
+</html>

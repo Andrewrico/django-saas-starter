@@ -1,0 +1,3 @@
+Your {{ SITE_NAME }} account ({{ email }}) and its data have been deleted.
+
+If this wasn't you, contact support right away.

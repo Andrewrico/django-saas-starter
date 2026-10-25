@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block head_title %}Sign up &middot; {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Create your account</h1>
+  <p class="help">You start on the free plan. No card required.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form.html" %}
+    <button type="submit" class="button">Sign up</button>
+  </form>
+  <p class="help">Already registered? <a href="{% url 'login' %}">Sign in</a></p>
+</section>
+{% endblock %}

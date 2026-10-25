@@ -1,0 +1,3 @@
+Welcome to {{ SITE_NAME }}!
+
+Your account ({{ email }}) is ready. You are on the {{ plan_name }} plan.

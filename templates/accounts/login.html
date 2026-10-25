@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block head_title %}Sign in &middot; {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Sign in</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form.html" %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="button">Sign in</button>
+  </form>
+  <p class="help"><a href="{% url 'account_reset_password' %}">Forgot your password?</a> &middot; <a href="{% url 'signup' %}">Create an account</a></p>
+</section>
+{% endblock %}
