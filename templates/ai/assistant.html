@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block head_title %}AI assistant &middot; {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>AI assistant</h1>
+  <p class="help">Summarize or improve text, or ask a question. {{ remaining }} of {{ limit }} requests left in the last 24 hours. Your text is sent to Anthropic's Claude to answer and is not stored here.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form.html" %}
+    <button type="submit" class="button">Send</button>
+  </form>
+  {% if error %}<p class="errors" role="alert">{{ error }}</p>{% endif %}
+  {% if answer %}
+    <h2>Answer</h2>
+    <div class="answer" role="status">{{ answer|linebreaks }}</div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -12,6 +12,7 @@ case and are unique case-insensitively (database constraint on `Lower(email)`).
 | `GET /api/auth/csrf/` | Sets the `csrftoken` cookie and returns `{"csrfToken": ...}` |
 | `POST /api/auth/signup/` | `{email, password, name?}` creates the user and (unless verification is mandatory) signs in |
 | `POST /api/auth/login/` | `{email, password}` |
+| `POST /api/auth/login/mfa/` | `{code}` completes the pending MFA login, using the same session cookie |
 | `POST /api/auth/logout/` | Ends the session |
 | `GET/PATCH /api/auth/me/` | Read or update `name` |
 | `DELETE /api/auth/me/` | `{password}` deletes the account and its data |
@@ -42,15 +43,80 @@ rest under `/accounts/` (password reset, change password, email confirmation). I
 
 Mail goes through the configured `EMAIL_BACKEND` (console in development).
 
-## Social providers (stub)
+## Social sign-in (Google, GitHub)
 
-`allauth.socialaccount` is installed with no providers. To add one, for example Google: add
-`"allauth.socialaccount.providers.google"` to `INSTALLED_APPS`, define `SOCIALACCOUNT_PROVIDERS`
-(scopes, app credentials from env), register the redirect URI
-`https://<host>/accounts/google/login/callback/` with the provider, and add a "Sign in with" link
-to the login template. See the [allauth docs](https://docs.allauth.org). This path is not
-exercised by the test suite.
+Both providers are installed and **off until their keys are set**. A provider with keys shows a
+"Continue with ..." button on `/login/` and `/signup/`; one without keys has no button and its
+URLs return 404.
 
-## Not included
+| Provider | Env vars | Redirect URI to register |
+|---|---|---|
+| Google | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | `https://<host>/accounts/google/login/callback/` |
+| GitHub | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | `https://<host>/accounts/github/login/callback/` |
 
-Email change, MFA and token authentication are on the roadmap.
+- Google: Google Cloud console, APIs & Services, Credentials, "OAuth client ID" (Web
+  application). Scopes: `openid email profile`.
+- GitHub: Settings, Developer settings, OAuth Apps. Scopes: `read:user user:email`.
+- For local testing register `http://localhost:8000/accounts/<provider>/login/callback/`.
+
+Behaviour (see the `SOCIALACCOUNT_*` block in `config/settings.py`):
+
+- Sign-in starts with a POST carrying the CSRF token (`SOCIALACCOUNT_LOGIN_ON_GET = False`), so
+  another site cannot start a login with a link.
+- A new user is created with the provider's email and name and no usable password (they can set
+  one with password reset). If the provider has no email, allauth asks for one.
+- **No silent account linking.** If the email already belongs to a password account, the provider
+  login does not sign into it (`SOCIALACCOUNT_EMAIL_AUTHENTICATION = False`). The user signs in
+  with their password and connects the provider at `/accounts/3rdparty/`.
+- Provider access tokens are not stored (`SOCIALACCOUNT_STORE_TOKENS = False`).
+
+Another provider: add `"allauth.socialaccount.providers.<name>"` to `INSTALLED_APPS` and an entry
+to `SOCIAL_PROVIDER_DEFAULTS`; the env-var pattern and the buttons follow automatically. Apps can
+also be added in the Django admin (Social applications) instead of env vars.
+`tests/test_social.py` covers the GitHub flow end to end with the provider's HTTP calls mocked.
+
+## Two-factor authentication
+
+Set `MFA_ENROLLMENT_ENABLED=true` to allow users to enrol an authenticator from the security
+link on `/account/`. Run `python manage.py migrate` first (this includes allauth's MFA
+migrations). Users must verify their primary email before enrolling. The setup page gives a
+manual setup key: use a time-based account with six digits and a 30-second interval. Activation
+generates recovery codes; save them somewhere private. Recovery codes are single-use and can
+be regenerated from the security page. Sensitive changes require recent reauthentication.
+Nothing changes for users who have not enrolled.
+
+Enrolment defaults to off. Turning it off later **does not disable existing MFA**: its login
+stages are always installed. `/login/`, `/accounts/login/`, linked social sign-in, and the JSON
+API all run allauth's staged login. The admin redirects to this same login flow. No authenticated
+session is issued until the second factor succeeds. Trusted-browser bypass is disabled.
+
+The API returns HTTP 401 with `{"mfa_required": true, "detail": "..."}` after a correct password
+for an enrolled account. Retain the pending session cookie and send a CSRF-protected JSON
+`POST /api/auth/login/mfa/` with `{"code": "123456"}` (or a recovery code). The response is the
+usual user JSON on success; a wrong/replayed code is HTTP 400. Both steps are throttled, and
+allauth also limits MFA failures per user. Pending logins expire after allauth's login timeout
+(default 15 minutes); missing or expired challenges require starting again. Fetch a fresh CSRF
+token after successful login, since Django rotates it. Clients cannot supply a user ID or backend.
+
+TOTP replay counters are stored in the database under a user-row lock, so replay protection
+survives worker changes and cache eviction. Recovery codes use allauth's database-backed
+single-use tracking. MFA secrets are encrypted using a key derived from `SECRET_KEY`; protect
+that key and database backups. `SECRET_KEY_FALLBACKS` supports decrypting records during key
+rotation (retain old keys until authenticators have been re-enrolled). MFA imports cryptography
+only when encrypting/decrypting a secret. Install the declared `django-allauth[mfa]` extra;
+allauth imports its WebAuthn dependency even when only TOTP/recovery codes are enabled.
+
+## Change email
+
+Use **Manage email addresses** on `/account/` (`/accounts/email/`). After reauthenticating, add
+the new address, open its emailed confirmation link, confirm it with a POST, then select **Make
+primary**. Unverified addresses can never be promoted, even when the old address is unverified.
+allauth updates `User.email` when the verified address becomes primary. Addresses belonging to
+another account cannot be taken; custom signup also checks secondary allauth addresses.
+
+Email confirmation never signs a user in. MFA users may add an address after recent
+reauthentication; the starter replaces allauth's blanket MFA add-email prohibition with this
+check while retaining its verified-email requirement for enrolment. Confirmation links are
+signed and expire under allauth's settings. In production configure a working email backend.
+
+Token authentication is not included.

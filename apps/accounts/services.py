@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db import IntegrityError, transaction
 from django.http import HttpRequest
+from django.http.response import HttpResponseBase
 
 from apps.billing.limits import get_plan
 from apps.core.email import send_email
@@ -34,7 +35,10 @@ def register_user(request: HttpRequest, email: str, password: str, name: str = "
     from allauth.account.models import EmailAddress
 
     email = email.strip().lower()
-    if User.objects.filter(email__iexact=email).exists():
+    if (
+        User.objects.filter(email__iexact=email).exists()
+        or EmailAddress.objects.filter(email__iexact=email).exists()
+    ):
         raise EmailTaken
     try:
         with transaction.atomic():
@@ -47,6 +51,14 @@ def register_user(request: HttpRequest, email: str, password: str, name: str = "
     else:
         address.send_confirmation(request, signup=True)
     return user
+
+
+def begin_login(request: HttpRequest, user: User, redirect_url: str | None = None) -> HttpResponseBase:
+    """Run the same staged password login for HTML and JSON callers."""
+    from allauth.account.internal.flows.login import perform_password_login
+    from allauth.account.models import Login
+
+    return perform_password_login(request, {"email": user.email}, Login(user=user, redirect_url=redirect_url))
 
 
 def authenticate_user(request: HttpRequest, email: str, password: str) -> User | None:

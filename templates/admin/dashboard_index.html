@@ -1,0 +1,17 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="module" id="analytics-module">
+  <table>
+    <caption>
+      <a href="{% url 'admin-dashboard' %}" class="section" title="Staff analytics">Analytics</a>
+    </caption>
+    <tr>
+      <th scope="row"><a href="{% url 'admin-dashboard' %}">Staff dashboard</a></th>
+      <td>Users, signups, plans, subscriptions, and example projects.</td>
+    </tr>
+  </table>
+</div>
+{{ block.super }}
+{% endblock %}

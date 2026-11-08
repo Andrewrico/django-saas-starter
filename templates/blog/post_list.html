@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block head_title %}Blog · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section blog-index">
+  <h1>Blog</h1>
+  <p class="lead">News and notes from {{ SITE_NAME }}.</p>
+  {% if posts %}
+    <ul class="blog-list">
+      {% for post in posts %}
+        <li>
+          <h2><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+          {% if post.published_at %}<p class="help"><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"M j, Y" }}</time></p>{% endif %}
+          {% if post.summary %}<p>{{ post.summary }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if page.has_other_pages %}
+      <nav class="pagination" aria-label="Blog pages">
+        {% if page.has_previous %}
+          <a href="?page={{ page.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}
+          <a href="?page={{ page.next_page_number }}">Next</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p class="help">No posts yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

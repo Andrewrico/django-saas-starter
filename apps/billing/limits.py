@@ -6,7 +6,7 @@ billing disabled (the default) it always returns the free plan.
 
 from .models import Plan, Subscription
 
-FREE_DEFAULT_LIMITS = {"max_items": 20}
+FREE_DEFAULT_LIMITS = {"max_items": 20, "max_files": 10}
 
 
 def get_free_plan() -> Plan:

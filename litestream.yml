@@ -1,0 +1,10 @@
+# Litestream: continuous SQLite backup to object storage (used only when LITESTREAM_REPLICA_URL is set).
+# Values are filled from the environment by Litestream itself. No secrets live here: on Cloud Run the
+# GCS client uses the service account's own credentials; for S3 set the usual AWS_* variables.
+# Replica URL examples: gs://my-bucket/db, s3://my-bucket/db, file:///backups/db (local testing).
+# Upload interval: 5s keeps object-storage write operations (and cost) low; it only uploads changes.
+sync-interval: 5s
+dbs:
+  - path: ${DB_PATH}
+    replica:
+      url: ${LITESTREAM_REPLICA_URL}

@@ -1,0 +1,14 @@
+{% load socialaccount %}
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+  <div class="social" aria-label="Sign in with another account">
+    {% for provider in socialaccount_providers %}
+      {# POST + CSRF: the sign-in can't be started by a link on another site. #}
+      <form method="post" action="{% provider_login_url provider process='login' next=next|default:'' %}">
+        {% csrf_token %}
+        <button type="submit" class="button secondary block">Continue with {{ provider.name }}</button>
+      </form>
+    {% endfor %}
+  </div>
+  <p class="divider"><span>or use your email</span></p>
+{% endif %}

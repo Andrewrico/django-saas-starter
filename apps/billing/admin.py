@@ -5,7 +5,7 @@ from .models import Plan, StripeEvent, Subscription
 
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
-    list_display = ("slug", "name", "stripe_price_id", "is_public", "sort_order")
+    list_display = ("slug", "name", "price_label", "stripe_price_id", "is_public", "sort_order")
     list_editable = ("sort_order", "is_public")
     search_fields = ("slug", "name", "stripe_price_id")
 

@@ -3,6 +3,8 @@ pytest>=8.3,<9
 pytest-django>=4.9,<5
 pytest-cov>=6.0,<8
 pytest-env>=1.1,<2
+# Browser tests (tests/e2e). Browsers: python -m playwright install chromium
+pytest-playwright>=0.7,<1
 ruff>=0.9
 mypy>=1.13
 pre-commit>=4.0

@@ -19,6 +19,12 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
 
 
+class MFACodeSerializer(serializers.Serializer):
+    """Second login step: a TOTP code or a recovery code."""
+
+    code = serializers.CharField(max_length=64)
+
+
 class UserSerializer(serializers.ModelSerializer):
     plan = serializers.SerializerMethodField()
 

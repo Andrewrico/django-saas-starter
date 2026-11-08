@@ -1,4 +1,4 @@
-.PHONY: setup run test lint format typecheck migrate check
+.PHONY: setup run test e2e lint format typecheck migrate check
 
 PY := .venv/bin/python
 
@@ -16,6 +16,9 @@ migrate:
 
 test:  ## Tests with coverage (fails under 90%)
 	$(PY) -m pytest
+
+e2e:  ## Browser tests (first time: .venv/bin/python -m playwright install chromium)
+	$(PY) -m pytest -m e2e --no-cov
 
 lint:  ## Lint, format check, type check
 	.venv/bin/ruff check .

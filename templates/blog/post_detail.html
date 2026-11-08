@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block head_title %}{{ post.title }} · {{ SITE_NAME }}{% endblock %}
+{% block extra_head %}
+  {% if post.meta_description %}<meta name="description" content="{{ post.meta_description }}">{% endif %}
+{% endblock %}
+{% block content %}
+<article class="section blog-post">
+  {% if is_draft %}
+    <p class="draft-banner" role="status">Draft — only staff can see this post.</p>
+  {% endif %}
+  <p class="help"><a href="{% url 'blog-list' %}">← Blog</a></p>
+  <h1>{{ post.title }}</h1>
+  {% if post.published_at %}
+    <p class="help"><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"F j, Y" }}</time>{% if post.author %} · {{ post.author }}{% endif %}</p>
+  {% elif post.author %}
+    <p class="help">{{ post.author }}</p>
+  {% endif %}
+  {% if post.summary %}<p class="lead">{{ post.summary }}</p>{% endif %}
+  <div class="blog-body">
+    {{ post.rendered_body|safe }}
+  </div>
+</article>
+{% endblock %}

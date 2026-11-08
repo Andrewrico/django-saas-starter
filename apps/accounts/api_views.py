@@ -15,7 +15,13 @@ from apps.core.email import send_email
 from apps.core.throttling import AuthRateThrottle
 
 from . import services
-from .serializers import DeleteAccountSerializer, LoginSerializer, SignupSerializer, UserSerializer
+from .serializers import (
+    DeleteAccountSerializer,
+    LoginSerializer,
+    MFACodeSerializer,
+    SignupSerializer,
+    UserSerializer,
+)
 
 
 @method_decorator(ensure_csrf_cookie, name="get")
@@ -67,8 +73,40 @@ class LoginView(APIView):
         user = services.authenticate_user(request._request, **serializer.validated_data)
         if user is None:
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
-        login(request._request, user, backend="django.contrib.auth.backends.ModelBackend")
+        logout(request._request)
+        services.begin_login(request._request, user)
+        if not request._request.user.is_authenticated:
+            return Response(
+                {"mfa_required": True, "detail": "Submit a code to /api/auth/login/mfa/."}, status=401
+            )
         return Response(UserSerializer(user).data)
+
+
+@method_decorator(csrf_protect, name="dispatch")
+class MFALoginView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    serializer_class = MFACodeSerializer
+
+    @extend_schema(request=MFACodeSerializer, responses={200: UserSerializer})
+    def post(self, request: Request) -> Response:
+        from allauth.account.stages import LoginStageController
+        from allauth.mfa.stages import AuthenticateStage
+
+        from .mfa import AuthenticateForm
+
+        stage = LoginStageController.enter(request._request, AuthenticateStage.key)
+        if not stage or not stage.login.user or not stage.login.user.is_active:
+            return Response({"detail": "No pending login. Sign in again."}, status=400)
+        form = AuthenticateForm(user=stage.login.user, data=request.data)
+        if not form.is_valid():
+            return Response({"code": form.errors.get("code", ["Invalid code."])}, status=400)
+        form.save()
+        stage.exit()
+        if not request._request.user.is_authenticated:
+            return Response({"detail": "Login could not be completed. Sign in again."}, status=400)
+        return Response(UserSerializer(request._request.user).data)
 
 
 class LogoutView(APIView):

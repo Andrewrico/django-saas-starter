@@ -43,3 +43,59 @@ dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; }
 dt { color: var(--muted); } dd { margin: 0; }
 hr { border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0; }
 .footer { color: var(--muted); padding-bottom: 2rem; }
+
+/* Landing page */
+.eyebrow { color: var(--muted); font-weight: 600; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 .5rem; }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 40rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.section { padding: 2rem 0; }
+.section h2 { font-size: 1.5rem; margin: 0 0 1rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 0; }
+.grid h3 { margin: 0 0 .4rem; font-size: 1.05rem; }
+.grid p { margin: 0; }
+.plan { display: flex; flex-direction: column; gap: .5rem; }
+.plan > .button, .plan > .help, .plan > form { margin-top: auto; align-self: flex-start; }
+.price { font-size: 1.75rem; font-weight: 700; margin: 0; }
+.checks { list-style: none; padding: 0; margin: 0 0 1rem; }
+.checks li::before { content: "\2713"; color: var(--ok); margin-right: .5rem; }
+details { border-bottom: 1px solid var(--border); padding: .75rem 0; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin: .5rem 0 0; }
+.cta { text-align: center; margin-top: 2rem; }
+/* Social sign-in */
+.social { display: grid; gap: .5rem; margin-bottom: 1rem; }
+.social form { margin: 0; }
+.button.block { display: block; width: 100%; text-align: center; }
+.divider { display: flex; align-items: center; gap: .75rem; color: var(--muted); font-size: .9rem; }
+.divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+/* `.container` resets padding, so restate main's vertical spacing. */
+main.container { padding-top: 2rem; padding-bottom: 3rem; }
+.nav li { white-space: nowrap; }
+@media (max-width: 30rem) {
+  .nav { gap: .5rem; }
+  .nav ul { gap: .6rem; font-size: .9rem; }
+  .nav .docs-link { display: none; }
+}
+.inline-block { display: inline-block; margin: 0 .5rem .5rem 0; }
+.notice { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: .4rem; padding: .6rem .8rem; }
+textarea, select { width: 100%; padding: .55rem .7rem; border: 1px solid var(--border); border-radius: .4rem; background: var(--bg); color: var(--fg); font: inherit; }
+.answer { background: var(--bg); border: 1px solid var(--border); border-radius: .4rem; padding: .75rem 1rem; }
+
+/* Account security pages: long email addresses and setup keys fit small screens. */
+.totp-secret { overflow-wrap: anywhere; }
+main dd, main p, main legend { overflow-wrap: anywhere; }
+main input[type="radio"], main input[type="checkbox"] { width: auto; }
+main pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Blog */
+.blog-list { list-style: none; padding: 0; margin: 1.5rem 0 0; }
+.blog-list li { border-top: 1px solid var(--border); padding: 1.25rem 0; }
+.blog-list h2 { margin: 0 0 .35rem; font-size: 1.25rem; }
+.blog-body { margin-top: 1.5rem; }
+.blog-body > :first-child { margin-top: 0; }
+.blog-body pre { overflow-x: auto; padding: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: .4rem; }
+.blog-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+.blog-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.blog-body th, .blog-body td { border: 1px solid var(--border); padding: .4rem .6rem; text-align: left; }
+.draft-banner { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: .4rem; padding: .6rem .8rem; }
+.pagination { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1.5rem; color: var(--muted); }

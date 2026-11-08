@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
 
+# How each `limits` key reads on the pricing section ("Up to 20 projects"). Add yours here.
+LIMIT_LABELS = {"max_items": "projects", "max_files": "files", "ai_requests_per_day": "AI requests a day"}
+
 
 class Plan(models.Model):
     """A subscription tier. ``limits`` is free-form JSON, e.g. ``{"max_items": 20}``."""
@@ -13,6 +16,11 @@ class Plan(models.Model):
     stripe_price_id = models.CharField(
         max_length=120, blank=True, help_text="Stripe Price id; empty = not purchasable"
     )
+    price_label = models.CharField(
+        max_length=40,
+        blank=True,
+        help_text="Shown on the pricing section, e.g. '$9/month'. Display only: Stripe charges the Price.",
+    )
     is_public = models.BooleanField(default=True)
     sort_order = models.PositiveSmallIntegerField(default=0)
 
@@ -21,6 +29,14 @@ class Plan(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def limit_lines(self) -> list[str]:
+        """Human-readable limits for the pricing section, e.g. ``["Up to 20 projects"]``."""
+        return [
+            f"Up to {value:,} {LIMIT_LABELS.get(key, key.replace('_', ' '))}"
+            for key, value in self.limits.items()
+            if isinstance(value, int) and not isinstance(value, bool)
+        ]
 
     def limit(self, key: str, default: int | None = None) -> int | None:
         value = self.limits.get(key, default)

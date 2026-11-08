@@ -77,7 +77,7 @@ def test_anonymous_gets_free_plan():
 
 def test_free_plan_is_recreated_if_missing(user):
     Plan.objects.filter(slug="free").delete()
-    assert get_plan(user).limits == {"max_items": 20}
+    assert get_plan(user).limits == {"max_items": 20, "max_files": 10}
 
 
 def test_active_subscription_changes_plan_but_inactive_does_not(user, pro_plan):

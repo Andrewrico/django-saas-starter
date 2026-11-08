@@ -7,6 +7,9 @@
   <title>{% block head_title %}{{ SITE_NAME }}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   {% block extra_head %}{% endblock %}
+  {% if PLAUSIBLE_DOMAIN %}
+  <script defer data-domain="{{ PLAUSIBLE_DOMAIN }}" src="https://plausible.io/js/script.js"></script>
+  {% endif %}
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -14,8 +17,11 @@
     <nav class="container nav" aria-label="Main">
       <a class="brand" href="{% url 'home' %}">{{ SITE_NAME }}</a>
       <ul>
-        <li><a href="{% url 'docs' %}">API docs</a></li>
+        <li><a href="{% url 'home' %}#pricing">Pricing</a></li>
+        <li><a href="{% url 'blog-list' %}">Blog</a></li>
+        <li class="docs-link"><a href="{% url 'docs' %}">API docs</a></li>
         {% if user.is_authenticated %}
+          {% if AI_ENABLED %}<li><a href="{% url 'ai-assistant' %}">AI</a></li>{% endif %}
           <li><a href="{% url 'account-settings' %}">Account</a></li>
           <li>
             <form method="post" action="{% url 'logout' %}" class="inline">

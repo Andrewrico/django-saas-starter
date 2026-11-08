@@ -2,12 +2,23 @@
 # Dependabot proposes bumps and CI verifies them.
 Django>=5.2,<5.3
 djangorestframework>=3.16,<3.17
-django-allauth>=65.0,<66
+# Extras: requests/PyJWT for social login, MFA deps. 65.21+ is required: apps/accounts/mfa.py
+# uses allauth internals (reauthentication, TOTP helpers); re-run the tests on every allauth bump.
+django-allauth[socialaccount,mfa]>=65.21,<66
 drf-spectacular>=0.28,<0.30
 drf-spectacular-sidecar>=2025.1
 django-environ>=0.12,<0.13
 whitenoise>=6.9,<7
 gunicorn>=23.0,<24
 psycopg[binary]>=3.2,<4
+# Imported lazily, only when ANTHROPIC_API_KEY is set (AI assistant demo).
+anthropic>=2.3,<3
 # Imported lazily, only when BILLING_ENABLED=true.
 stripe>=12.0
+# Imported only when GS_BUCKET_NAME selects private Google Cloud Storage.
+django-storages[google]>=1.14,<2
+# Used lazily to encrypt MFA secrets with a key derived from SECRET_KEY.
+cryptography>=44
+# Blog: Markdown rendering + HTML sanitisation (apps.blog.markdown).
+markdown>=3.7,<4
+nh3>=0.2,<1

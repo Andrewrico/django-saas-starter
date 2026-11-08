@@ -11,7 +11,7 @@ browser / API client
                  --> example (/api/projects/)         core (/healthz)
                  --> allauth (/accounts/...)          admin, OpenAPI
         |
-  Django ORM --> Postgres (DATABASE_URL) or SQLite in development
+  Django ORM --> Postgres (DATABASE_URL) or SQLite (development, or production with Litestream)
 ```
 
 ## Apps

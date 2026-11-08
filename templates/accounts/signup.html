@@ -4,6 +4,7 @@
 <section class="card narrow">
   <h1>Create your account</h1>
   <p class="help">You start on the free plan. No card required.</p>
+  {% include "partials/social.html" %}
   <form method="post" novalidate>
     {% csrf_token %}
     {% include "partials/form.html" %}

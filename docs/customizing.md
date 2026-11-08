@@ -14,6 +14,14 @@ skips the `config/` and `apps/` Python packages on purpose (renaming importable 
 riskier than it is worth; do it by hand with your editor if you need to). Also update the
 copyright holder in `LICENSE`, `SECURITY.md` contacts and the GitHub `OWNER` placeholders.
 
+## Edit the landing page
+
+`templates/accounts/home.html` holds the copy (hero, features, FAQ). Pricing is generated from
+the public plans: set each plan's name, `price_label` (display text such as `$9/month`; Stripe's
+Price is what is charged) and `limits` in the admin. Limit keys read as "Up to N <label>"; add
+labels for your own keys to `LIMIT_LABELS` in `apps/billing/models.py`. A paid plan shows a button
+only when billing is enabled and the plan has a Stripe Price id; otherwise "Coming soon".
+
 ## Add an app
 
 1. `mkdir apps/tasks && python manage.py startapp tasks apps/tasks`, then set `name = "apps.tasks"`
@@ -42,7 +50,10 @@ from apps.core.job_registry import job
 def send_digests() -> None: ...
 ```
 
-Run it with `python manage.py runjobs send_digests` from cron. See `python manage.py runjobs --list`.
+Run it with `python manage.py runjobs send_digests` from cron (see `python manage.py runjobs --list`),
+or let the scheduler call `POST /internal/jobs/run/`, which runs every registered job, so new jobs
+are picked up automatically (docs/deployment.md). Jobs can run more than once (retries), so
+make them idempotent.
 
 ## Send email
 

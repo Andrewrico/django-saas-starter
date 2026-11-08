@@ -1,0 +1,94 @@
+{% extends "admin/base_site.html" %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; margin: 1rem 0 1.5rem; }
+  .dash-stat { background: var(--body-bg, #fff); border: 1px solid var(--border, #ccc); border-radius: 6px; padding: .9rem 1rem; }
+  .dash-stat .label { display: block; color: var(--body-quiet-color, #666); font-size: .85rem; }
+  .dash-stat .value { font-size: 1.6rem; font-weight: 700; }
+  .signup-chart { display: flex; align-items: flex-end; gap: 3px; height: 10rem; padding: .5rem 0; border-bottom: 1px solid var(--border, #ccc); }
+  .signup-bar { flex: 1; min-width: 0; background: var(--link-fg, #447e9b); border-radius: 2px 2px 0 0; min-height: 2px; height: var(--h, 0%); }
+  .signup-chart[aria-hidden="true"] { pointer-events: none; }
+  .dash-section { margin: 1.75rem 0; }
+  .dash-section h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
+</style>
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>Live totals from the database. Generated {{ generated_at }}.</p>
+
+<section class="dash-section" aria-labelledby="users-heading">
+  <h2 id="users-heading">Users</h2>
+  <div class="dash-grid">
+    <div class="dash-stat"><span class="label">Total</span><span class="value">{{ total_users }}</span></div>
+    <div class="dash-stat"><span class="label">Signed up today</span><span class="value">{{ signups_today }}</span></div>
+    <div class="dash-stat"><span class="label">Last 7 days</span><span class="value">{{ signups_last_7 }}</span></div>
+    <div class="dash-stat"><span class="label">Last 30 days</span><span class="value">{{ signups_last_30 }}</span></div>
+  </div>
+</section>
+
+<section class="dash-section" aria-labelledby="chart-heading">
+  <h2 id="chart-heading">Daily signups (last 30 days)</h2>
+  <div class="signup-chart" role="img" aria-hidden="true">
+    {% for row in daily_signups %}
+      <div class="signup-bar" style="--h: {{ row.height_pct }}%;" title="{{ row.day }}: {{ row.count }}"></div>
+    {% endfor %}
+  </div>
+  <table>
+    <caption>Daily signup counts</caption>
+    <thead><tr><th scope="col">Date</th><th scope="col">Signups</th></tr></thead>
+    <tbody>
+      {% for row in daily_signups %}
+        <tr><td>{{ row.day }}</td><td>{{ row.count }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="dash-section" aria-labelledby="plans-heading">
+  <h2 id="plans-heading">Users per plan</h2>
+  <p>Only active or trialing subscriptions count toward a paid plan; everyone else is Free.</p>
+  <table>
+    <thead><tr><th scope="col">Plan</th><th scope="col">Users</th></tr></thead>
+    <tbody>
+      {% for plan in users_per_plan %}
+        <tr><td>{{ plan.name }} ({{ plan.slug }})</td><td>{{ plan.count }}</td></tr>
+      {% empty %}
+        <tr><td colspan="2">No users yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="dash-section" aria-labelledby="subs-heading">
+  <h2 id="subs-heading">Subscriptions</h2>
+  <div class="dash-grid">
+    <div class="dash-stat"><span class="label">Active / trialing</span><span class="value">{{ active_subscriptions }}</span></div>
+    <div class="dash-stat"><span class="label">Cancel at period end</span><span class="value">{{ cancel_at_period_end }}</span></div>
+  </div>
+</section>
+
+<section class="dash-section" aria-labelledby="email-heading">
+  <h2 id="email-heading">Email addresses</h2>
+  <div class="dash-grid">
+    <div class="dash-stat"><span class="label">Verified</span><span class="value">{{ emails_verified }}</span></div>
+    <div class="dash-stat"><span class="label">Unverified</span><span class="value">{{ emails_unverified }}</span></div>
+  </div>
+</section>
+
+<section class="dash-section" aria-labelledby="auth-heading">
+  <h2 id="auth-heading">Sign-in methods</h2>
+  <div class="dash-grid">
+    <div class="dash-stat"><span class="label">Social account linked</span><span class="value">{{ users_social }}</span></div>
+    <div class="dash-stat"><span class="label">Password-only</span><span class="value">{{ users_password_only }}</span></div>
+  </div>
+</section>
+
+<section class="dash-section" aria-labelledby="projects-heading">
+  <h2 id="projects-heading">Example projects</h2>
+  <div class="dash-grid">
+    <div class="dash-stat"><span class="label">Created in last 30 days</span><span class="value">{{ projects_last_30 }}</span></div>
+  </div>
+</section>
+{% endblock %}

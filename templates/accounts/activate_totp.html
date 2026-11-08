@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block head_title %}Set up authenticator · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Set up an authenticator app</h1>
+  <p>Add a new time-based account in your authenticator app. Enter your email as the account name and copy this setup key:</p>
+  <p><code class="totp-secret">{{ form.secret }}</code></p>
+  <p>Use six digits and a 30-second interval. Then enter the code shown in your app.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% include "partials/form.html" %}
+    <button type="submit" class="button">Activate authenticator</button>
+  </form>
+  <p><a href="{% url 'mfa_index' %}">Back to security settings</a></p>
+</section>
+{% endblock %}

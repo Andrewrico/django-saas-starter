@@ -19,8 +19,13 @@ class SignupForm(forms.Form):
     )
 
     def clean_email(self) -> str:
+        from allauth.account.models import EmailAddress
+
         email = self.cleaned_data["email"].strip().lower()
-        if User.objects.filter(email__iexact=email).exists():
+        if (
+            User.objects.filter(email__iexact=email).exists()
+            or EmailAddress.objects.filter(email__iexact=email).exists()
+        ):
             raise forms.ValidationError("A user with this email already exists.")
         return email
 

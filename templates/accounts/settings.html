@@ -7,12 +7,31 @@
     <dt>Email</dt><dd>{{ user.email }}</dd>
     <dt>Plan</dt><dd>{{ plan.name }}</dd>
   </dl>
+  {% if billing_notice %}<p class="notice" role="status">{{ billing_notice }}</p>{% endif %}
+  {% if billing_enabled %}
+    {% for option in upgrade_plans %}
+      <form method="post" action="{% url 'billing-checkout-page' option.slug %}" class="inline-block">
+        {% csrf_token %}
+        <button type="submit" class="button">Upgrade to {{ option.name }}{% if option.price_label %} ({{ option.price_label }}){% endif %}</button>
+      </form>
+    {% endfor %}
+    {% if can_manage_billing %}
+      <form method="post" action="{% url 'billing-portal-page' %}" class="inline-block">
+        {% csrf_token %}
+        <button type="submit" class="button secondary">Manage billing</button>
+      </form>
+    {% endif %}
+  {% endif %}
+  <hr>
   <form method="post" novalidate>
     {% csrf_token %}
     {% include "partials/form.html" %}
     <button type="submit" class="button">Save</button>
   </form>
   <p class="help"><a href="{% url 'account_change_password' %}">Change password</a></p>
+  <p><a href="{% url 'account_email' %}">Manage email addresses</a></p>
+  <p><a href="{% url 'mfa_index' %}">Two-factor authentication and recovery codes</a></p>
+  {% if not mfa_enrollment_enabled %}<p class="help">New authenticator enrolment is currently disabled.</p>{% endif %}
   <hr>
   <h2>Danger zone</h2>
   <p><a class="button danger" href="{% url 'account-delete' %}">Delete account</a></p>

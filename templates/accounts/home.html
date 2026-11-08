@@ -1,16 +1,77 @@
 {% extends "base.html" %}
+{% block head_title %}{{ SITE_NAME }} &middot; launch your SaaS on Django{% endblock %}
+{% block extra_head %}<meta name="description" content="{{ SITE_NAME }}: accounts, plans and billing for your SaaS, ready on day one.">{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>{{ SITE_NAME }}</h1>
-  <p>A production-minded Django SaaS starter: accounts, plans, optional Stripe billing and an owner-scoped API example.</p>
-  <p>
+{# Landing page: replace the copy with your product's. Pricing reads the public plans from the admin. #}
+<section class="hero" aria-labelledby="hero-title">
+  <p class="eyebrow">Open source &middot; MIT</p>
+  <h1 id="hero-title">Ship your SaaS on Django, not on plumbing.</h1>
+  <p class="lead">Accounts, social sign-in, plans with limits, optional Stripe billing and a Cloud Run
+    deploy recipe. The first week of work is done, in a stack you can read end to end.</p>
+  <p class="actions">
     {% if user.is_authenticated %}
       <a class="button" href="{% url 'account-settings' %}">Go to your account</a>
     {% else %}
-      <a class="button" href="{% url 'signup' %}">Create an account</a>
+      <a class="button" href="{% url 'signup' %}">Start free</a>
       <a class="button secondary" href="{% url 'login' %}">Sign in</a>
     {% endif %}
-    <a class="button secondary" href="{% url 'docs' %}">Explore the API</a>
   </p>
 </section>
+
+<section class="section" aria-labelledby="features-title">
+  <h2 id="features-title">Everything the first week needs</h2>
+  <ul class="grid features">
+    <li class="card"><h3>Sign-in that just works</h3><p>Email and password with verification and reset, plus Google and GitHub once you add keys.</p></li>
+    <li class="card"><h3>Plans and limits</h3><p>Every user starts free. Limits live on the plan, so upgrades change one row, not your code.</p></li>
+    <li class="card"><h3>Billing when you want it</h3><p>Stripe Checkout, customer portal and a signed webhook. Off until you switch it on.</p></li>
+    <li class="card"><h3>A JSON API</h3><p>Session-authenticated, CSRF-protected and documented with OpenAPI and Swagger UI.</p></li>
+    <li class="card"><h3>Backups built in</h3><p>SQLite with Litestream streams every change to Cloud Storage and restores on start.</p></li>
+    <li class="card"><h3>Secure by default</h3><p>HTTPS, HSTS, CSP, rate-limited auth and a 90% test coverage gate in CI.</p></li>
+  </ul>
+</section>
+
+{% if plans %}
+<section class="section" id="pricing" aria-labelledby="pricing-title">
+  <h2 id="pricing-title">Pricing</h2>
+  <p class="help">Start free. No card required.</p>
+  <ul class="grid plans">
+    {% for plan in plans %}
+      <li class="card plan">
+        <h3>{{ plan.name }}</h3>
+        {% if plan.price_label %}<p class="price">{{ plan.price_label }}</p>{% endif %}
+        <ul class="checks">
+          {% for line in plan.limit_lines %}<li>{{ line }}</li>{% endfor %}
+        </ul>
+        {% if plan.slug == "free" %}
+          {% if not user.is_authenticated %}<a class="button" href="{% url 'signup' %}">Start free</a>{% endif %}
+        {% elif billing_enabled and plan.stripe_price_id %}
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'billing-checkout-page' plan.slug %}">
+              {% csrf_token %}<button type="submit" class="button secondary">Choose {{ plan.name }}</button>
+            </form>
+          {% else %}
+            <a class="button secondary" href="{% url 'signup' %}">Choose {{ plan.name }}</a>
+          {% endif %}
+        {% else %}
+          <p class="help">Coming soon</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="section" aria-labelledby="faq-title">
+  <h2 id="faq-title">Questions</h2>
+  <details><summary>Do I need a credit card to start?</summary><p>No. Everyone starts on the free plan.</p></details>
+  <details><summary>Can I sign in with Google or GitHub?</summary><p>Yes, when the site owner has turned them on. You can also use your email.</p></details>
+  <details><summary>Can I delete my account?</summary><p>Yes, any time, from your account settings. Your data is deleted with it.</p></details>
+</section>
+
+{% if not user.is_authenticated %}
+<section class="section cta card">
+  <h2>Ready when you are</h2>
+  <p><a class="button" href="{% url 'signup' %}">Create your free account</a></p>
+</section>
+{% endif %}
 {% endblock %}
